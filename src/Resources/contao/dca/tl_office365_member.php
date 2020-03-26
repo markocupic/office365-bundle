@@ -63,7 +63,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
     // Palettes
     'palettes'    => [
         '__selector__' => [],
-        'default'      => '{personal_legend},name,firstname,lastname,accountType;{contact_legend},email;{login_legend},username,initialPassword',
+        'default'      => '{personal_legend},name,firstname,lastname,studentId,ahv,accountType,teacherAcronym;{contact_legend},email;{login_legend},username,initialPassword',
     ],
 
     // Subpalettes
@@ -77,6 +77,24 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
         ],
         'tstamp'          => [
             'sql' => "int(10) unsigned NOT NULL default 0"
+        ],
+        'studentId'       => [
+            'exclude'   => true,
+            'search'    => true,
+            'sorting'   => true,
+            'flag'      => 1,
+            'inputType' => 'text',
+            'eval'      => ['mandatory' => false, 'rgxp' => 'natural', 'maxlength' => 255, 'tl_class' => 'w50'],
+            'sql'       => "int(10) unsigned NOT NULL default 0"
+        ],
+        'ahv'             => [
+            'exclude'   => true,
+            'search'    => true,
+            'sorting'   => true,
+            'flag'      => 1,
+            'inputType' => 'text',
+            'eval'      => ['mandatory' => false, 'rgxp' => 'natural', 'maxlength' => 255, 'tl_class' => 'w50'],
+            'sql'       => "int(10) unsigned NOT NULL default 0"
         ],
         'firstname'       => [
             'exclude'   => true,
@@ -118,6 +136,16 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'inputType' => 'select',
             'options'   => ['student', 'teacher', 'other'],
             'eval'      => ['mandatory' => true, 'maxlength' => 255, 'tl_class' => 'w50'],
+            'sql'       => "varchar(255) NOT NULL default ''"
+        ],
+        'teacherAcronym'  => [
+            'exclude'   => true,
+            'search'    => true,
+            'sorting'   => true,
+            'filter'    => true,
+            'flag'      => 1,
+            'inputType' => 'text',
+            'eval'      => ['mandatory' => false, 'maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
         'username'        => [
