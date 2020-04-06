@@ -93,8 +93,8 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'sorting'   => true,
             'flag'      => 1,
             'inputType' => 'text',
-            'eval'      => ['mandatory' => false, 'rgxp' => 'natural', 'maxlength' => 255, 'tl_class' => 'w50'],
-            'sql'       => "int(10) unsigned NOT NULL default 0"
+            'eval'      => ['mandatory' => false, 'rgxp' => 'natural', 'maxlength' => 20, 'tl_class' => 'w50'],
+            'sql'       => "bigint(20) unsigned NOT NULL default 0"
         ],
         'firstname'       => [
             'exclude'   => true,
