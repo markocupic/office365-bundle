@@ -1,11 +1,12 @@
 <?php
 
 /**
- * Contao Open Source CMS
- * Copyright (C) 2005-2012 Leo Feyer
- * @package Custom Header
- * @link    http://www.contao.org
- * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
+ * @copyright  Marko Cupic 2020 <m.cupic@gmx.ch>
+ * @author     Marko Cupic
+ * @package    Office365Bundle for Schule Ettiswil
+ * @license    MIT
+ * @see        https://github.com/markocupic/office365-bundle
+ *
  */
 
 // Legends

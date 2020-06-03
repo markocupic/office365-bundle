@@ -1,11 +1,12 @@
 <?php
 
-/*
- * This file is part of Contao.
+/**
+ * @copyright  Marko Cupic 2020 <m.cupic@gmx.ch>
+ * @author     Marko Cupic
+ * @package    Office365Bundle for Schule Ettiswil
+ * @license    MIT
+ * @see        https://github.com/markocupic/office365-bundle
  *
- * (c) Leo Feyer
- *
- * @license LGPL-3.0-or-later
  */
 
 $GLOBALS['TL_DCA']['tl_office365_member'] = [
@@ -134,7 +135,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'exclude'   => true,
             'filter'    => true,
             'inputType' => 'select',
-            'options'   => ['student', 'teacher', 'other'],
+            'options'   => ['student', 'teacher', 'misc'],
             'eval'      => ['mandatory' => true, 'maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],

@@ -1,11 +1,12 @@
 <?php
 
-/*
- * This file is part of Contao.
+/**
+ * @copyright  Marko Cupic 2020 <m.cupic@gmx.ch>
+ * @author     Marko Cupic
+ * @package    Office365Bundle for Schule Ettiswil
+ * @license    MIT
+ * @see        https://github.com/markocupic/office365-bundle
  *
- * Copyright (c) 2005-2016 Leo Feyer
- *
- * @license LGPL-3.0+
  */
 
 namespace Markocupic\Office365Bundle;
@@ -13,9 +14,8 @@ namespace Markocupic\Office365Bundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
- * Configures the gallery-creator-bundle.
- *
- * @author Marko Cupic <https://github.com/markocupic>
+ * Class MarkocupicOffice365Bundle
+ * @package Markocupic\Office365Bundle
  */
 class MarkocupicOffice365Bundle extends Bundle
 {
