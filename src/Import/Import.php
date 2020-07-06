@@ -54,8 +54,12 @@ class Import
         $objCsv->setDelimiter($strDelimiter);
         $objCsv->setHeaderOffset(0);
 
+        if ($blnTestMode === true)
+        {
+            $this->sessionMessage->addInfoMessage('Run script in test mode.');
+        }
 
-        if($accountType !== 'student')
+        if ($accountType !== 'student')
         {
             $this->sessionMessage->addErrorMessage(sprintf('Account Type "%s" is still not supported.', $accountType));
         }
