@@ -17,4 +17,13 @@ $GLOBALS['BE_MOD']['office365'] = array(
     (
         'tables' => array('tl_office365_member'),
     ),
+    'office365_member_import'     => array
+    (
+        'tables' => array('tl_office365_member_import'),
+    ),
 );
+
+/**
+ * Models
+ */
+$GLOBALS['TL_MODELS']['tl_office365_member'] = \Markocupic\Office365Bundle\Model\Office365MemberModel::class;

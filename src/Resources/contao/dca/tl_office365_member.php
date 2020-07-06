@@ -58,6 +58,11 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
                 'icon'       => 'delete.svg',
                 'attributes' => 'onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm'] . '\'))return false;Backend.getScrollOffset()"'
             ],
+            'toggle' => [
+                'icon'            => 'visible.svg',
+                'attributes'      => 'onclick="Backend.getScrollOffset();return AjaxRequest.toggleVisibility(this,%s)"',
+                'button_callback' => ['tl_office365_member', 'toggleIcon']
+            ],
         ]
     ],
 
@@ -164,6 +169,20 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'      => ['mandatory' => true, 'nospace' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
+        'disable'         => [
+            'exclude'   => true,
+            'filter'    => true,
+            'inputType' => 'checkbox',
+            'sql'       => "char(1) NOT NULL default ''"
+        ],
+        'dateAdded'       => [
+            'label'   => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
+            'default' => time(),
+            'sorting' => true,
+            'flag'    => 6,
+            'eval'    => ['rgxp' => 'datim', 'doNotCopy' => true],
+            'sql'     => "int(10) unsigned NOT NULL default 0"
+        ],
     ]
 ];
 
@@ -181,6 +200,153 @@ class tl_office365_member extends Contao\Backend
     {
         parent::__construct();
         $this->import('Contao\BackendUser', 'User');
+    }
+
+    /**
+     * Return the "toggle visibility" button
+     *
+     * @param array $row
+     * @param string $href
+     * @param string $label
+     * @param string $title
+     * @param string $icon
+     * @param string $attributes
+     *
+     * @return string
+     */
+    public function toggleIcon($row, $href, $label, $title, $icon, $attributes)
+    {
+        if (Contao\Input::get('tid'))
+        {
+            $this->toggleVisibility(Contao\Input::get('tid'), (Contao\Input::get('state') == 1), (@func_get_arg(12) ?: null));
+            $this->redirect($this->getReferer());
+        }
+
+        // Check permissions AFTER checking the tid, so hacking attempts are logged
+        if (!$this->User->hasAccess('tl_office365_member::disable', 'alexf'))
+        {
+            return '';
+        }
+
+        $href .= '&amp;tid=' . $row['id'] . '&amp;state=' . $row['disable'];
+
+        if ($row['disable'])
+        {
+            $icon = 'invisible.svg';
+        }
+
+        return '<a href="' . $this->addToUrl($href) . '" title="' . Contao\StringUtil::specialchars($title) . '"' . $attributes . '>' . Contao\Image::getHtml($icon, $label, 'data-state="' . ($row['disable'] ? 0 : 1) . '"') . '</a> ';
+    }
+
+    /**
+     * Disable/enable a user group
+     *
+     * @param integer $intId
+     * @param boolean $blnVisible
+     * @param Contao\DataContainer $dc
+     *
+     * @throws Contao\CoreBundle\Exception\AccessDeniedException
+     */
+    public function toggleVisibility($intId, $blnVisible, Contao\DataContainer $dc = null)
+    {
+        // Set the ID and action
+        Contao\Input::setGet('id', $intId);
+        Contao\Input::setGet('act', 'toggle');
+
+        if ($dc)
+        {
+            $dc->id = $intId; // see #8043
+        }
+
+        // Trigger the onload_callback
+        if (is_array($GLOBALS['TL_DCA']['tl_office365_member']['config']['onload_callback']))
+        {
+            foreach ($GLOBALS['TL_DCA']['tl_office365_member']['config']['onload_callback'] as $callback)
+            {
+                if (is_array($callback))
+                {
+                    $this->import($callback[0]);
+                    $this->{$callback[0]}->{$callback[1]}($dc);
+                }
+                elseif (is_callable($callback))
+                {
+                    $callback($dc);
+                }
+            }
+        }
+
+        // Check the field access
+        if (!$this->User->hasAccess('tl_office365_member::disable', 'alexf'))
+        {
+            throw new Contao\CoreBundle\Exception\AccessDeniedException('Not enough permissions to activate/deactivate member ID ' . $intId . '.');
+        }
+
+        // Set the current record
+        if ($dc)
+        {
+            $objRow = $this->Database->prepare("SELECT * FROM tl_office365_member WHERE id=?")
+                ->limit(1)
+                ->execute($intId);
+
+            if ($objRow->numRows)
+            {
+                $dc->activeRecord = $objRow;
+            }
+        }
+
+        $objVersions = new Contao\Versions('tl_office365_member', $intId);
+        $objVersions->initialize();
+
+        // Reverse the logic (members have disabled=1)
+        $blnVisible = !$blnVisible;
+
+        // Trigger the save_callback
+        if (is_array($GLOBALS['TL_DCA']['tl_office365_member']['fields']['disable']['save_callback']))
+        {
+            foreach ($GLOBALS['TL_DCA']['tl_office365_member']['fields']['disable']['save_callback'] as $callback)
+            {
+                if (is_array($callback))
+                {
+                    $this->import($callback[0]);
+                    $blnVisible = $this->{$callback[0]}->{$callback[1]}($blnVisible, $dc);
+                }
+                elseif (is_callable($callback))
+                {
+                    $blnVisible = $callback($blnVisible, $dc);
+                }
+            }
+        }
+
+        $time = time();
+
+        // Update the database
+        $this->Database->prepare("UPDATE tl_office365_member SET tstamp=$time, disable='" . ($blnVisible ? '1' : '') . "' WHERE id=?")
+            ->execute($intId);
+
+        if ($dc)
+        {
+            $dc->activeRecord->tstamp = $time;
+            $dc->activeRecord->disable = ($blnVisible ? '1' : '');
+        }
+
+        // Trigger the onsubmit_callback
+        if (is_array($GLOBALS['TL_DCA']['tl_office365_member']['config']['onsubmit_callback']))
+        {
+            foreach ($GLOBALS['TL_DCA']['tl_office365_member']['config']['onsubmit_callback'] as $callback)
+            {
+                if (is_array($callback))
+                {
+                    $this->import($callback[0]);
+                    $this->{$callback[0]}->{$callback[1]}($dc);
+                }
+                elseif (is_callable($callback))
+                {
+                    $callback($dc);
+                }
+            }
+        }
+
+        $objVersions->create();
     }
 
 }

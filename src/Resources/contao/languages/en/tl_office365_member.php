@@ -25,4 +25,4 @@ $GLOBALS['TL_LANG']['tl_office365_member']['initialPassword'] = ['Initialpasswor
 $GLOBALS['TL_LANG']['tl_office365_member']['studentId'] = ['SchülerId', ''];
 $GLOBALS['TL_LANG']['tl_office365_member']['teacherAcronym'] = ['Gehört zu Klassenlehrer', ''];
 $GLOBALS['TL_LANG']['tl_office365_member']['ahv'] = ['AHV-Nummer', ''];
-
+$GLOBALS['TL_LANG']['tl_office365_member']['disable'] = ['Deaktivieren', 'Das Konto vorübergehend deaktivieren.'];

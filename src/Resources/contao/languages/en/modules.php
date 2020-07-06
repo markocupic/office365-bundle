@@ -9,8 +9,8 @@
  *
  */
 
-$GLOBALS['TL_LANG']['MOD']['office365']['0'] = "Office 365 Tools";
-$GLOBALS['TL_LANG']['MOD']['office365_member']['0'] = "Office 365 Konten";
-$GLOBALS['TL_LANG']['MOD']['office365_member']['1'] = "Office 365 Konten administrieren";
+$GLOBALS['TL_LANG']['MOD']['office365'] = ["Office 365 Tools"];
+$GLOBALS['TL_LANG']['MOD']['office365_member'] = ["Office 365 Konten", "Office 365 Konten administrieren"];
+$GLOBALS['TL_LANG']['MOD']['office365_member_import'] = ["Office 365 Konto-Import", "Office 365 Konten importieren"];
 
 
