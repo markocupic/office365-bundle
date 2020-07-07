@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Markocupic\Office365Bundle\Import;
 
 use Contao\File;
-use Contao\Message;
 use Contao\System;
 use Contao\Database;
 use Contao\Validator;
@@ -45,10 +44,11 @@ class Import
      * @param string $accountType
      * @param File $objFile
      * @param string $strDelimiter
+     * @param string $strEnclosure
      * @param bool $blnTestMode
      * @throws \League\Csv\Exception
      */
-    public function initImport(string $accountType, File $objFile, string $strDelimiter = ';', bool $blnTestMode = false): void
+    public function initImport(string $accountType, File $objFile, string $strDelimiter = ';', string $strEnclosure = '"', bool $blnTestMode = false): void
     {
         $rootDir = System::getContainer()->getParameter('kernel.project_dir');
 
@@ -59,6 +59,7 @@ class Import
 
         $objCsv = Reader::createFromPath($rootDir . '/' . $objFile->path, 'r');
         $objCsv->setDelimiter($strDelimiter);
+        $objCsv->setEnclosure($strEnclosure);
         $objCsv->setHeaderOffset(0);
 
         if ($blnTestMode === true)
@@ -93,72 +94,91 @@ class Import
 
                 $intCountRows++;
 
-                $objMember = Office365MemberModel::findOneByStudentId($row['studentId']);
-                if ($objMember !== null)
+                $objOffice365 = Office365MemberModel::findOneByStudentId($row['studentId']);
+                if ($objOffice365 !== null)
                 {
+                    // Update record, if modified
+
                     $activeStudentIDS[] = $row['studentId'];
-                    // Update, if modified
+
                     $arrFields = ['teacherAcronym', 'firstname', 'lastname', 'ahv', 'notice'];
                     foreach ($arrFields as $field)
                     {
                         if (!empty($row[$field]))
                         {
-                            $objMember->$field = $row[$field];
+                            $objOffice365->$field = $row[$field];
                         }
                     }
 
-                    $objMember->name = $objMember->firstname . ' ' . $objMember->lastname;
-                    if ($objMember->initialPassword == '' && !empty($row['initialPassword']))
-                    {
-                        $objMember->initialPassword = $row['initialPassword'];
-                    }
-                    // Do not overwrite email or initialPassword!!!!!
+                    $objOffice365->name = $objOffice365->firstname . ' ' . $objOffice365->lastname;
 
-                    if ($objMember->isModified())
+                    // Do not overwrite initialPassword!!!!!
+                    if ($objOffice365->initialPassword == '')
+                    {
+                        $objOffice365->initialPassword = $row['initialPassword'];
+                    }
+
+                    // Do not overwrite email!!!!!
+                    if ($objOffice365->email == '')
+                    {
+                        $objOffice365->email = $row['email'];
+                    }
+
+                    if ($objOffice365->isModified())
                     {
                         $intCountUpdates++;
-                        $objMember->tstamp = time();
-                        $this->sessionMessage->addInfoMessage(sprintf('Update student "%s %s [%s]"', $row['firstname'], $row['lastname'], $row['email']));
+                        $this->sessionMessage->addInfoMessage(sprintf('Update student "%s %s [%s]"', $objOffice365->firstname, $objOffice365->lastname, $objOffice365->email));
+
+                        if ($blnTestMode === false)
+                        {
+                            $objOffice365->tstamp = time();
+                            $objOffice365->save();
+                        }
                     }
 
-                    if ($blnTestMode === false)
+                    if ($blnTestMode)
                     {
-                        $objMember->save();
+                        $objOffice365->refresh();
                     }
                 }
                 else
                 {
-                    // Insert
+                    // Insert new record
                     $intCountInserts++;
 
-                    $objMember = new Office365MemberModel();
+                    $objOffice365 = new Office365MemberModel();
                     $activeStudentIDS[] = $row['studentId'];
-                    $objMember->accountType = $row['accountType'];
-                    $objMember->studentId = $row['studentId'];
-                    $objMember->teacherAcronym = $row['teacherAcronym'];
-                    $objMember->firstname = $row['firstname'];
-                    $objMember->lastname = $row['lastname'];
-                    $objMember->name = $objMember->firstname . ' ' . $objMember->lastname;
-                    $objMember->email = $row['email'];
-                    $objMember->ahv = $row['ahv'];
-                    $objMember->notice = $row['notice'];
+                    $objOffice365->accountType = $row['accountType'];
+                    $objOffice365->studentId = $row['studentId'];
+                    $objOffice365->teacherAcronym = $row['teacherAcronym'];
+                    $objOffice365->firstname = $row['firstname'];
+                    $objOffice365->lastname = $row['lastname'];
+                    $objOffice365->name = $objOffice365->firstname . ' ' . $objOffice365->lastname;
+                    $objOffice365->email = $row['email'];
+                    $objOffice365->ahv = $row['ahv'];
+                    $objOffice365->notice = $row['notice'];
 
-                    $objMember->dateAdded = time();
-                    $objMember->tstamp = time();
+                    $objOffice365->dateAdded = time();
+                    $objOffice365->tstamp = time();
 
                     if ($row['email'] == '')
                     {
                         $fn = $this->sanitizeName($row['firstname']);
                         $ln = $this->sanitizeName($row['lastname']);
                         $row['email'] = sprintf('%s_%s@stud.schule-ettiswil.ch', $fn, $ln);
-                        $objMember->email = $row['email'];
-                    }
-                    if ($blnTestMode === false)
-                    {
-                        $objMember->save();
+                        $objOffice365->email = $row['email'];
                     }
 
-                    $this->sessionMessage->addInfoMessage(sprintf('Add new student "%s %s [%s]. Check data(f.ex. email address)!!!!"', $row['firstname'], $row['lastname'], $row['email']));
+                    $this->sessionMessage->addInfoMessage(sprintf('Add new student "%s %s [%s]. Check data(f.ex. email address)!!!!"', $objOffice365->firstname, $objOffice365->lastname, $objOffice365->email));
+
+                    if ($blnTestMode === false)
+                    {
+                        $objOffice365->save();
+                    }
+                    else
+                    {
+                        $objOffice365->delete();
+                    }
                 }
             }
 
@@ -167,6 +187,8 @@ class Import
             if (!empty($activeStudentIDS))
             {
                 $objDisabledStudents = Database::getInstance()->prepare('SELECT * FROM tl_office365_member WHERE accountType=? AND tl_office365_member.studentId NOT IN(' . implode(',', $activeStudentIDS) . ')')->execute($accountType);
+
+                // Count disabled students
                 $intCountDeactivatedStudents = $objDisabledStudents->numRows;
 
                 while ($objDisabledStudents->next())
@@ -187,7 +209,7 @@ class Import
                 }
             }
 
-            // Check for uniqueness
+            // Check for uniqueness and valid email address
             $objUser = Database::getInstance()->execute('SELECT * FROM tl_office365_member ORDER BY email');
             while ($objUser->next())
             {
@@ -251,7 +273,8 @@ class Import
     {
         $strName = trim($strName);
 
-        $strName = preg_replace('/[\pC]/u', '', $strName);
+        // Remove control characters
+        $strName = preg_replace('/[[:cntrl:]]/', '', $strName);
 
         if ($strName === null)
         {

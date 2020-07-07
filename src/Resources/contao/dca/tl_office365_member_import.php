@@ -163,6 +163,7 @@ class tl_office365_member_import extends Contao\Backend
         $accountType = (string) \Contao\Input::post('accountType');
         $objFilesModel = \Contao\FilesModel::findByUuid(\Contao\Input::post('singleSRC'));
         $strDelimiter = ';';
+        $strEnclosure = '"';
 
         // call the import class if file exists
         if (is_file(TL_ROOT . '/' . $objFilesModel->path))
@@ -171,7 +172,7 @@ class tl_office365_member_import extends Contao\Backend
             if (strtolower($objFile->extension) === 'csv')
             {
                 $objImport = \Contao\System::getContainer()->get('Markocupic\Office365Bundle\Import\Import');
-                $objImport->initImport($accountType, $objFile, $strDelimiter, $blnTestMode);
+                $objImport->initImport($accountType, $objFile, $strDelimiter, $strEnclosure, $blnTestMode);
             }
         }
     }
