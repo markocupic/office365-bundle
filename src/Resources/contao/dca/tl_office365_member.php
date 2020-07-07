@@ -15,7 +15,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
         'dataContainer'     => 'Table',
         'enableVersioning'  => true,
         'onsubmit_callback' => [
-            array('tl_office365_member', 'storeDateAdded')
+            ['tl_office365_member', 'storeDateAdded']
         ],
         'sql'               => [
             'keys' => [
@@ -34,7 +34,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'panelLayout' => 'filter;sort,search,limit'
         ],
         'label'             => [
-            'fields'      => ['name', 'firstname', 'lastname', 'email'],
+            'fields'      => ['name', 'email', 'initialPassword', 'accountType', 'teacherAcronym'],
             'showColumns' => true,
         ],
         'global_operations' => [
@@ -398,6 +398,5 @@ class tl_office365_member extends Contao\Backend
         $this->Database->prepare("UPDATE tl_office365_member SET dateAdded=? WHERE id=?")
             ->execute($time, $dc->id);
     }
-
 
 }
