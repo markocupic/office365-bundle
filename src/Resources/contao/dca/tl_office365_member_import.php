@@ -136,22 +136,20 @@ class tl_office365_member_import extends Contao\Backend
             /** @var \Markocupic\Office365Bundle\Message\SessionMessage $sessionMessage */
             $sessionMessage = \Contao\System::getContainer()->get('Markocupic\Office365Bundle\Message\SessionMessage');
 
-            if ($sessionMessage->hasInfoMessages())
-            {
-                foreach ($sessionMessage->getInfoMessages() as $msg)
-                {
-                    \Contao\Message::addInfo($msg);
-                }
-                $sessionMessage->deleteInfoMessages();
-            }
-
             if ($sessionMessage->hasErrorMessages())
             {
                 foreach ($sessionMessage->getErrorMessages() as $msg)
                 {
                     \Contao\Message::addError($msg);
                 }
-                $sessionMessage->deleteErrorMessages();
+            }
+
+            if ($sessionMessage->hasInfoMessages())
+            {
+                foreach ($sessionMessage->getInfoMessages() as $msg)
+                {
+                    \Contao\Message::addInfo($msg);
+                }
             }
         }
     }

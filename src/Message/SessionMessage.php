@@ -13,6 +13,10 @@ declare(strict_types=1);
 
 namespace Markocupic\Office365Bundle\Message;
 
+/**
+ * Class SessionMessage
+ * @package Markocupic\Office365Bundle\Message
+ */
 class SessionMessage
 {
 
@@ -61,19 +65,25 @@ class SessionMessage
     }
 
     /**
+     * Delete messages and return them as array
      * @return array
      */
     public function getInfoMessages(): array
     {
-        return $_SESSION['Office365Bundle']['messages']['info'];
+        $arrMsg = $_SESSION['Office365Bundle']['messages']['info'];
+        $_SESSION['Office365Bundle']['messages']['info'] = [];
+        return $arrMsg;
     }
 
     /**
+     * Delete messages and return them as array
      * @return array
      */
     public function getErrorMessages(): array
     {
-        return $_SESSION['Office365Bundle']['messages']['error'];
+        $arrMsg = $_SESSION['Office365Bundle']['messages']['error'];
+        $_SESSION['Office365Bundle']['messages']['error'] = [];
+        return $arrMsg;
     }
 
     /**

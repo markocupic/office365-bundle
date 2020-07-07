@@ -15,7 +15,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
         'dataContainer'     => 'Table',
         'enableVersioning'  => true,
         'onsubmit_callback' => [
-            //array('tl_member', 'storeDateAdded')
+            array('tl_office365_member', 'storeDateAdded')
         ],
         'sql'               => [
             'keys' => [
@@ -69,7 +69,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
     // Palettes
     'palettes'    => [
         '__selector__' => [],
-        'default'      => '{personal_legend},name,firstname,lastname,studentId,ahv,accountType,teacherAcronym;{contact_legend},email;{login_legend},username,initialPassword',
+        'default'      => '{personal_legend},name,firstname,lastname,studentId,ahv,accountType,teacherAcronym,enteredIn,dateAdded;{contact_legend},email;{notice_legend},notice;{login_legend},username,initialPassword',
     ],
 
     // Subpalettes
@@ -126,19 +126,21 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'sorting'   => true,
             'flag'      => 1,
             'inputType' => 'text',
-            'eval'      => ['mandatory' => true, 'maxlength' => 255, 'tl_class' => 'w50'],
+            'eval'      => ['mandatory' => false, 'maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
         'email'           => [
             'exclude'   => true,
             'search'    => true,
+            'sorting'   => true,
             'inputType' => 'text',
-            'eval'      => ['mandatory' => true, 'maxlength' => 255, 'rgxp' => 'email', 'unique' => true, 'decodeEntities' => true, 'tl_class' => 'w50'],
+            'eval'      => ['mandatory' => false, 'maxlength' => 255, 'rgxp' => 'email', 'unique' => true, 'decodeEntities' => true, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
         'accountType'     => [
             'exclude'   => true,
             'filter'    => true,
+            'sorting'   => true,
             'inputType' => 'select',
             'options'   => ['student', 'teacher', 'misc'],
             'eval'      => ['mandatory' => true, 'maxlength' => 255, 'tl_class' => 'w50'],
@@ -165,9 +167,18 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
         ],
         'initialPassword' => [
             'exclude'   => true,
+            'sorting'   => true,
             'inputType' => 'text',
-            'eval'      => ['mandatory' => true, 'nospace' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
+            'eval'      => ['mandatory' => false, 'nospace' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
+        ],
+        'enteredIn'       => [
+            'exclude'   => true,
+            'sorting'   => true,
+            'flag'      => 6,
+            'inputType' => 'text',
+            'eval'      => ['rgxp' => 'date', 'datepicker' => true, 'doNotCopy' => true, 'tl_class' => 'w50 wizard'],
+            'sql'       => "varchar(11) NOT NULL default ''"
         ],
         'disable'         => [
             'exclude'   => true,
@@ -182,6 +193,14 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'flag'    => 6,
             'eval'    => ['rgxp' => 'datim', 'doNotCopy' => true],
             'sql'     => "int(10) unsigned NOT NULL default 0"
+        ],
+        'notice'          => [
+            'exclude'   => true,
+            'sorting'   => true,
+            'search'    => 'true',
+            'inputType' => 'text',
+            'eval'      => ['mandatory' => false, 'maxlength' => 200, 'tl_class' => 'w50'],
+            'sql'       => "varchar(255) NOT NULL default ''"
         ],
     ]
 ];
@@ -348,5 +367,37 @@ class tl_office365_member extends Contao\Backend
 
         $objVersions->create();
     }
+
+    /**
+     * @param $dc
+     */
+    public function storeDateAdded($dc)
+    {
+        // Front end call
+        if (!$dc instanceof Contao\DataContainer)
+        {
+            return;
+        }
+
+        // Return if there is no active record (override all)
+        if (!$dc->activeRecord || $dc->activeRecord->dateAdded > 0)
+        {
+            return;
+        }
+
+        // Fallback solution for existing accounts
+        if ($dc->activeRecord->enteredIn > 0)
+        {
+            $time = $dc->activeRecord->enteredIn;
+        }
+        else
+        {
+            $time = time();
+        }
+
+        $this->Database->prepare("UPDATE tl_office365_member SET dateAdded=? WHERE id=?")
+            ->execute($time, $dc->id);
+    }
+
 
 }
