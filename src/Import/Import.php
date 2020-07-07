@@ -250,6 +250,14 @@ class Import
     private function sanitizeName(string $strName = '')
     {
         $strName = trim($strName);
+
+        $strName = preg_replace('/[\pC]/u', '', $strName);
+
+        if ($strName === null)
+        {
+            throw new \InvalidArgumentException('The file name could not be sanitized');
+        }
+
         $arrRep = [
             'Ö'  => 'OE',
             'Ä'  => 'AE',
