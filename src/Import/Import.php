@@ -76,6 +76,9 @@ class Import
 
             foreach ($results as $row)
             {
+                // Remove whitespaces
+                $row = array_map('trim', $row);
+
                 if ($row['accountType'] !== 'student')
                 {
                     continue;
@@ -93,7 +96,7 @@ class Import
                 if ($objMember !== null)
                 {
                     $activeStudentIDS[] = $row['studentId'];
-                    // Update, if is modified
+                    // Update, if modified
                     $arrFields = ['teacherAcronym', 'firstname', 'lastname', 'ahv', 'notice'];
                     foreach ($arrFields as $field)
                     {
@@ -132,8 +135,8 @@ class Import
                     $objMember->accountType = $row['accountType'];
                     $objMember->studentId = $row['studentId'];
                     $objMember->teacherAcronym = $row['teacherAcronym'];
-                    $objMember->firstname = ltrim(rtrim($row['firstname']));
-                    $objMember->lastname = ltrim(rtrim($row['lastname']));
+                    $objMember->firstname = $row['firstname'];
+                    $objMember->lastname = $row['lastname'];
                     $objMember->name = $objMember->firstname . ' ' . $objMember->lastname;
                     $objMember->email = $row['email'];
                     $objMember->ahv = $row['ahv'];
@@ -189,7 +192,7 @@ class Import
             {
                 if ($objUnique->email != '')
                 {
-                    if ($this->isUniqueValue('email', $objUnique) === false)
+                    if (!Database::getInstance()->isUniqueValue('tl_office365_member', 'email', $objUnique->email, $objUnique->id))
                     {
                         $this->sessionMessage->addErrorMessage(
                             sprintf(
@@ -202,7 +205,7 @@ class Import
 
                 if ($objUnique->studentId != '0')
                 {
-                    if ($this->isUniqueValue('studentId', $objUnique) === false)
+                    if (!Database::getInstance()->isUniqueValue('tl_office365_member', 'studentId', $objUnique->studentId, $objUnique->id))
                     {
                         $this->sessionMessage->addErrorMessage(
                             sprintf(
@@ -233,25 +236,15 @@ class Import
      * @param string $strName
      * @return mixed|string
      */
-    private function sanitizeName(string $strName)
+    private function sanitizeName(string $strName = '')
     {
         $strName = strtolower($strName);
         $strName = str_replace(' ', '', $strName);
         $strName = str_replace('ö', 'oe', $strName);
         $strName = str_replace('ä', 'ae', $strName);
         $strName = str_replace('ü', 'ue', $strName);
-        return $strName;
-    }
 
-    /**
-     * @param string $strField
-     * @param $objDb
-     * @param string $strTable
-     * @return bool
-     */
-    private function isUniqueValue(string $strField, $objDb, string $strTable = 'tl_office365_member'): bool
-    {
-        return Database::getInstance()->isUniqueValue($strTable, $strField, $objDb->{$strField}, $objDb->id);
+        return trim($strName);
     }
 
 }
