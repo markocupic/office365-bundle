@@ -193,7 +193,7 @@ class Import
                     {
                         $this->sessionMessage->addErrorMessage(
                             sprintf(
-                                'Email address "%s" is not unique.',
+                                'Email address "%s" is not unique!',
                                 $objUnique->email
                             )
                         );
@@ -206,7 +206,7 @@ class Import
                     {
                         $this->sessionMessage->addErrorMessage(
                             sprintf(
-                                'studentId "%s" for "%s %s" is not unique.',
+                                'studentId "%s" for "%s %s" is not unique!',
                                 $objUnique->studentId,
                                 $objUnique->firstname,
                                 $objUnique->lastname
