@@ -17,6 +17,7 @@ use Contao\File;
 use Contao\Message;
 use Contao\System;
 use Contao\Database;
+use Contao\Validator;
 use League\Csv\Reader;
 use Markocupic\Office365Bundle\Message\SessionMessage;
 use Markocupic\Office365Bundle\Model\Office365MemberModel;
@@ -187,32 +188,42 @@ class Import
             }
 
             // Check for uniqueness
-            $objUnique = Database::getInstance()->execute('SELECT * FROM tl_office365_member ORDER BY email');
-            while ($objUnique->next())
+            $objUser = Database::getInstance()->execute('SELECT * FROM tl_office365_member ORDER BY email');
+            while ($objUser->next())
             {
-                if ($objUnique->email != '')
+                if ($objUser->email != '')
                 {
-                    if (!Database::getInstance()->isUniqueValue('tl_office365_member', 'email', $objUnique->email, $objUnique->id))
+                    if (!Database::getInstance()->isUniqueValue('tl_office365_member', 'email', $objUser->email, $objUser->id))
                     {
                         $this->sessionMessage->addErrorMessage(
                             sprintf(
                                 'Email address "%s" is not unique!',
-                                $objUnique->email
+                                $objUser->email
+                            )
+                        );
+                    }
+
+                    if (!Validator::isEmail($objUser->email))
+                    {
+                        $this->sessionMessage->addErrorMessage(
+                            sprintf(
+                                'Invalid email address "%s"!',
+                                $objUser->email
                             )
                         );
                     }
                 }
 
-                if ($objUnique->studentId != '0')
+                if ($objUser->studentId != '0')
                 {
-                    if (!Database::getInstance()->isUniqueValue('tl_office365_member', 'studentId', $objUnique->studentId, $objUnique->id))
+                    if (!Database::getInstance()->isUniqueValue('tl_office365_member', 'studentId', $objUser->studentId, $objUser->id))
                     {
                         $this->sessionMessage->addErrorMessage(
                             sprintf(
                                 'studentId "%s" for "%s %s" is not unique!',
-                                $objUnique->studentId,
-                                $objUnique->firstname,
-                                $objUnique->lastname
+                                $objUser->studentId,
+                                $objUser->firstname,
+                                $objUser->lastname
                             )
                         );
                     }
@@ -234,15 +245,33 @@ class Import
 
     /**
      * @param string $strName
-     * @return mixed|string
+     * @return string
      */
     private function sanitizeName(string $strName = '')
     {
+        $strName = trim($strName);
+        $arrRep = [
+            'Ö'  => 'OE',
+            'Ä'  => 'AE',
+            'Ü'  => 'UE',
+            'É'  => 'E',
+            'À'  => 'A',
+            'ö'  => 'oe',
+            'ä'  => 'oe',
+            'ü'  => 'oe',
+            'é'  => 'oe',
+            'à'  => 'oe',
+            'ç'  => 'c',
+            '´`' => '',
+            '`'  => '',
+        ];
+
+        foreach ($arrRep as $k => $v)
+        {
+            $strName = str_replace($k, $v, $strName);
+        }
+
         $strName = strtolower($strName);
-        $strName = str_replace(' ', '', $strName);
-        $strName = str_replace('ö', 'oe', $strName);
-        $strName = str_replace('ä', 'ae', $strName);
-        $strName = str_replace('ü', 'ue', $strName);
 
         return trim($strName);
     }
