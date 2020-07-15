@@ -8,3 +8,6 @@ services:
 
     Markocupic\Office365Bundle\Message\SessionMessage: ~
 
+    Markocupic\Office365Bundle\Email\SendPassword: ~
+
+

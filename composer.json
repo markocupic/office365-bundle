@@ -8,7 +8,7 @@
     "store",
     "content"
   ],
-  "version": "1.6",
+  "version": "1.7",
   "type": "contao-module",
   "license": "MIT",
   "authors": [
@@ -24,7 +24,9 @@
     "source": "https://github.com/markocupic/office365-bundle"
   },
   "require": {
-    "contao/core-bundle": "^4.9"
+    "contao/core-bundle": "^4.9",
+    "league/csv": "^9.1",
+    "codefog/contao-haste": "^4.23"
   },
   "autoload": {
     "psr-4": {

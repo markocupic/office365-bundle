@@ -9,6 +9,11 @@
  *
  */
 
+
+
+// Operations
+$GLOBALS['TL_LANG']['tl_office365_member']['emailSent'] = 'E-Mail versandt';
+
 // Legends
 $GLOBALS['TL_LANG']['tl_office365_member']['personal_legend'] = 'Personalien';
 $GLOBALS['TL_LANG']['tl_office365_member']['contact_legend'] = 'Kontaktangaben';

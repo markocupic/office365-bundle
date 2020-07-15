@@ -45,24 +45,42 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             ]
         ],
         'operations'        => [
-            'edit'   => [
+            'edit'      => [
                 'href' => 'act=edit',
                 'icon' => 'edit.svg'
             ],
-            'copy'   => [
+            'copy'      => [
                 'href' => 'act=copy',
                 'icon' => 'copy.svg'
             ],
-            'delete' => [
+            'delete'    => [
                 'href'       => 'act=delete',
                 'icon'       => 'delete.svg',
                 'attributes' => 'onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm'] . '\'))return false;Backend.getScrollOffset()"'
             ],
-            'toggle' => [
+            'toggle'    => [
                 'icon'            => 'visible.svg',
                 'attributes'      => 'onclick="Backend.getScrollOffset();return AjaxRequest.toggleVisibility(this,%s)"',
                 'button_callback' => ['tl_office365_member', 'toggleIcon']
             ],
+            'emailSent' => [
+                'label'                => &$GLOBALS['TL_LANG']['tl_office365_member']['emailSent'],
+                'attributes'           => 'onclick="Backend.getScrollOffset();"',
+                'haste_ajax_operation' => [
+                    'field'                     => 'passwordEmailSent',
+                    'check_permission_callback' => ['tl_office365_member', 'shouldSendEmail'],
+                    'options'                   => [
+                        [
+                            'value' => '',
+                            'icon'  => 'bundles/markocupicoffice365/uncheck.png'
+                        ],
+                        [
+                            'value' => '1',
+                            'icon'  => 'bundles/markocupicoffice365/check.png'
+                        ]
+                    ]
+                ]
+            ]
         ]
     ],
 
@@ -78,13 +96,13 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
 
     // Fields
     'fields'      => [
-        'id'              => [
+        'id'                => [
             'sql' => "int(10) unsigned NOT NULL auto_increment"
         ],
-        'tstamp'          => [
+        'tstamp'            => [
             'sql' => "int(10) unsigned NOT NULL default 0"
         ],
-        'studentId'       => [
+        'studentId'         => [
             'exclude'   => true,
             'search'    => true,
             'sorting'   => true,
@@ -93,7 +111,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'      => ['mandatory' => false, 'rgxp' => 'natural', 'maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "int(10) unsigned NOT NULL default 0"
         ],
-        'ahv'             => [
+        'ahv'               => [
             'exclude'   => true,
             'search'    => true,
             'sorting'   => true,
@@ -102,7 +120,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'      => ['mandatory' => false, 'rgxp' => 'natural', 'maxlength' => 20, 'tl_class' => 'w50'],
             'sql'       => "bigint(20) unsigned NOT NULL default 0"
         ],
-        'firstname'       => [
+        'firstname'         => [
             'exclude'   => true,
             'search'    => true,
             'sorting'   => true,
@@ -111,7 +129,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'      => ['mandatory' => false, 'maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
-        'lastname'        => [
+        'lastname'          => [
             'exclude'   => true,
             'search'    => true,
             'sorting'   => true,
@@ -120,7 +138,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'      => ['mandatory' => false, 'maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
-        'name'            => [
+        'name'              => [
             'exclude'   => true,
             'search'    => true,
             'sorting'   => true,
@@ -129,7 +147,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'      => ['mandatory' => false, 'maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
-        'email'           => [
+        'email'             => [
             'exclude'   => true,
             'search'    => true,
             'sorting'   => true,
@@ -137,7 +155,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'      => ['mandatory' => false, 'maxlength' => 255, 'rgxp' => 'email', 'unique' => true, 'decodeEntities' => true, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
-        'accountType'     => [
+        'accountType'       => [
             'exclude'   => true,
             'filter'    => true,
             'sorting'   => true,
@@ -146,7 +164,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'      => ['mandatory' => true, 'maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
-        'teacherAcronym'  => [
+        'teacherAcronym'    => [
             'exclude'   => true,
             'search'    => true,
             'sorting'   => true,
@@ -156,7 +174,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'      => ['mandatory' => false, 'maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
-        'username'        => [
+        'username'          => [
             'exclude'   => true,
             'search'    => true,
             'sorting'   => true,
@@ -165,14 +183,14 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'      => ['mandatory' => false, 'unique' => true, 'rgxp' => 'extnd', 'nospace' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => 'varchar(64) BINARY NULL'
         ],
-        'initialPassword' => [
+        'initialPassword'   => [
             'exclude'   => true,
             'sorting'   => true,
             'inputType' => 'text',
             'eval'      => ['mandatory' => false, 'nospace' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
-        'enteredIn'       => [
+        'enteredIn'         => [
             'exclude'   => true,
             'sorting'   => true,
             'flag'      => 6,
@@ -180,13 +198,13 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'      => ['rgxp' => 'date', 'datepicker' => true, 'doNotCopy' => true, 'tl_class' => 'w50 wizard'],
             'sql'       => "varchar(11) NOT NULL default ''"
         ],
-        'disable'         => [
+        'disable'           => [
             'exclude'   => true,
             'filter'    => true,
             'inputType' => 'checkbox',
             'sql'       => "char(1) NOT NULL default ''"
         ],
-        'dateAdded'       => [
+        'dateAdded'         => [
             'label'   => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
             'default' => time(),
             'sorting' => true,
@@ -194,7 +212,7 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'    => ['rgxp' => 'datim', 'doNotCopy' => true],
             'sql'     => "int(10) unsigned NOT NULL default 0"
         ],
-        'notice'          => [
+        'notice'            => [
             'exclude'   => true,
             'sorting'   => true,
             'search'    => 'true',
@@ -202,6 +220,13 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
             'eval'      => ['mandatory' => false, 'maxlength' => 200, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
+        'passwordEmailSent' => [
+            'exclude'   => true,
+            'filter'    => true,
+            'inputType' => 'checkbox',
+            'sql'       => "char(1) NOT NULL default ''"
+        ],
+
     ]
 ];
 
@@ -219,6 +244,22 @@ class tl_office365_member extends Contao\Backend
     {
         parent::__construct();
         $this->import('Contao\BackendUser', 'User');
+
+    }
+
+    function shouldSendEmail($table, $hasteAjaxOperationSettings, &$hasPermission)
+    {
+
+        $hasPermission = true;
+
+        $objMember = \Markocupic\Office365Bundle\Model\Office365MemberModel::findByPk(\Contao\Input::post('id'));
+
+        if($objMember !== null && !$objMember->emailSent && \Contao\Input::post('action') === 'hasteAjaxOperation' && \Contao\Input::post('operation') === 'emailSent')
+        {
+            $objEmail = \Contao\System::getContainer()->get(Markocupic\Office365Bundle\Email\SendPassword::class);
+            $objEmail->sendCredentials($objMember);
+        }
+
     }
 
     /**
@@ -398,5 +439,6 @@ class tl_office365_member extends Contao\Backend
         $this->Database->prepare("UPDATE tl_office365_member SET dateAdded=? WHERE id=?")
             ->execute($time, $dc->id);
     }
+
 
 }
