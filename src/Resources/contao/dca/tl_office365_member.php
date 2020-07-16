@@ -17,6 +17,9 @@ $GLOBALS['TL_DCA']['tl_office365_member'] = [
         'onsubmit_callback' => [
             ['tl_office365_member', 'storeDateAdded']
         ],
+        'onload_callback'   => [
+            ['tl_office365_member', 'checkSendingEmailsIsPermittedInContaoBackendSettings']
+        ],
         'sql'               => [
             'keys' => [
                 'id'    => 'primary',
@@ -244,22 +247,35 @@ class tl_office365_member extends Contao\Backend
     {
         parent::__construct();
         $this->import('Contao\BackendUser', 'User');
-
     }
 
-    function shouldSendEmail($table, $hasteAjaxOperationSettings, &$hasPermission)
+    public function checkSendingEmailsIsPermittedInContaoBackendSettings()
     {
-
-        $hasPermission = true;
-
-        $objMember = \Markocupic\Office365Bundle\Model\Office365MemberModel::findByPk(\Contao\Input::post('id'));
-
-        if($objMember !== null && !$objMember->emailSent && \Contao\Input::post('action') === 'hasteAjaxOperation' && \Contao\Input::post('operation') === 'emailSent')
+        // Activate sending emails in the contao settings
+        if (!strlen(\Contao\Input::get('act')) && \Contao\Input::get('do') === 'office365_member' && !\Contao\Config::get('allowSendingEmailInTheOffice365BackendModule'))
         {
-            $objEmail = \Contao\System::getContainer()->get(Markocupic\Office365Bundle\Email\SendPassword::class);
-            $objEmail->sendCredentials($objMember);
+            \Contao\Message::addInfo('Sending Message is not possible! You have to enable it in the contao backend settings under "office365 settings".');
         }
+    }
 
+    public function shouldSendEmail($table, $hasteAjaxOperationSettings, &$hasPermission)
+    {
+        if (\Contao\Config::get('allowSendingEmailInTheOffice365BackendModule'))
+        {
+            $hasPermission = true;
+
+            $objMember = \Markocupic\Office365Bundle\Model\Office365MemberModel::findByPk(\Contao\Input::post('id'));
+
+            if ($objMember !== null && !$objMember->emailSent && \Contao\Input::post('action') === 'hasteAjaxOperation' && \Contao\Input::post('operation') === 'emailSent')
+            {
+                $objEmail = \Contao\System::getContainer()->get(Markocupic\Office365Bundle\Email\SendPassword::class);
+                $objEmail->sendCredentials($objMember);
+            }
+        }
+        else
+        {
+            $hasPermission = false;
+        }
     }
 
     /**
@@ -439,6 +455,5 @@ class tl_office365_member extends Contao\Backend
         $this->Database->prepare("UPDATE tl_office365_member SET dateAdded=? WHERE id=?")
             ->execute($time, $dc->id);
     }
-
 
 }

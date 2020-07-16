@@ -9,6 +9,9 @@
  *
  */
 
+// Legend
+
+
 // Fields
 $GLOBALS['TL_DCA']['tl_settings']['fields']['allowSendingEmailInTheOffice365BackendModule'] = [
     'label'     => &$GLOBALS['TL_LANG']['tl_settings']['allowSendingEmailInTheOffice365BackendModule'],
@@ -18,6 +21,8 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['allowSendingEmailInTheOffice365Back
 
 // Extend the default palettes
 Contao\CoreBundle\DataContainer\PaletteManipulator::create()
-    ->addLegend('office365_legend', 'cron_legend', Contao\CoreBundle\DataContainer\PaletteManipulator::POSITION_AFTER)
+    ->addLegend('office365_legend', 'default', Contao\CoreBundle\DataContainer\PaletteManipulator::POSITION_APPEND)
     ->addField(['allowSendingEmailInTheOffice365BackendModule'], 'office365_legend', Contao\CoreBundle\DataContainer\PaletteManipulator::POSITION_APPEND)
     ->applyToPalette('default', 'tl_settings');
+
+

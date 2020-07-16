@@ -30,6 +30,7 @@ class SendPassword
      */
     public function __construct()
     {
+
     }
 
     /**
@@ -41,6 +42,7 @@ class SendPassword
         {
             return;
         }
+
         // Activate sending emails in the contao settings
         if(!Config::get('allowSendingEmailInTheOffice365BackendModule'))
         {
